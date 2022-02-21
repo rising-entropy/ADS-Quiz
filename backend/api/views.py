@@ -93,14 +93,9 @@ class QuizAPI(APIView):
         score = 0
         theQuiz = Quiz.objects.filter(id=id)[0]
         totalQuestionCount = len(Question.objects.filter(quiz=theQuiz))
-        for answer in theAnswers:
-            theID = -1
-            theAnswer = ""
-            for k,v in answer.items():
-                if k == "id":
-                    theID = v
-                if k == "answer":
-                    theAnswer = v
+        for k,v in theAnswers.items():
+            theID = k
+            theAnswer = v
             if Question.objects.filter(id=theID)[0].correctAnswer == theAnswer:
                 score += 1
         userData = jwt.decode(request.META['HTTP_AUTHORIZATION'], JWT_SECRET, JWT_ALGORITHM)
@@ -252,3 +247,24 @@ class ScoresAPI(APIView):
                 "name": i.student.first_name+" "+i.student.last_name
             })
         return Response(theRequiredInstances)
+
+class Questions2API(APIView):
+    def get(self, request, id):
+        if validateJWT(request) is False:
+            return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
+        theQuiz = Quiz.objects.filter(id=id)[0]
+        theQuestions = Question.objects.filter(quiz=theQuiz)
+        theRequiredQuestions = []
+        for i in theQuestions:
+            theRequiredQuestions.append({
+                "id": i.id,
+                "question": i.question,
+                "imageLink": i.imageLink,
+                "option1": i.option1,
+                "option2": i.option2,
+                "option3": i.option3,
+                "option4": i.option4,
+                "correctAnswer": i.correctAnswer,
+                "quiz": i.quiz.name
+            })
+        return Response(theRequiredQuestions)

@@ -14,13 +14,10 @@ export default function IndividualQuizPage() {
         window.location = '/quiz/'+id;
     }
 
-    console.log(id)
-
     const [theQuestions, setTheQuestions] = useState([]);
 
-
     useEffect(()=>{
-        axios.get('http://localhost:8000/api/questions', {
+        axios.get('http://localhost:8000/api/questions/'+id, {
             headers: {
                 "Authorization": localStorage.getItem('jwt')
             }
