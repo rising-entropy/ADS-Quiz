@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import axios from 'axios'
+import jwt_decode from "jwt-decode";
 
 export default function LoginPage() {
 
@@ -21,7 +22,17 @@ export default function LoginPage() {
             {
                 let theJWT = response.data.token;
                 localStorage.setItem('jwt', theJWT);
-                alert("Logged In!")
+                alert("Logged In!");
+                let decodedJWT = jwt_decode(theJWT);
+                console.log(decodedJWT)
+                if(decodedJWT.role === 'teacher')
+                {
+                    window.location='/teacher'
+                }
+                else
+                {
+                    window.location='/student'
+                }
             }
             else
             {

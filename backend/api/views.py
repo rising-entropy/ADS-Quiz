@@ -117,7 +117,6 @@ class QuizAPI(APIView):
             "questions": totalQuestionCount,
             "quiz": theQuiz.name
         })
-    
 
     def get(self, request, id):
         if validateJWT(request) is False:
