@@ -39,7 +39,7 @@ export default function AddQuestion(props) {
 
 
   return (
-    <div className="container container-fluid">
+    <div className="container container-fluid card" style={{margin: '20px auto'}}>
         <h4 style={{margin: '10px auto'}}>Add Question:</h4>
         <form onSubmit={submitHandler}>
             <input onChange={onChangeHandler} placeholder='Question' className='form-control' type="text" name='question' id='question' required /><br />

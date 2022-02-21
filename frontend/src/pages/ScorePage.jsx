@@ -49,7 +49,6 @@ export default function ScorePage(props) {
                         <td>{e.questions}</td>
                     </tr>
                 })}
-                
             </tbody>
             </table>
     </div>

@@ -9,9 +9,15 @@ import IndividualQuestion from '../components/IndividualQuestion';
 export default function IndividualQuizPage() {
     let { id } = useParams();
 
+    const updateAlert = () => {
+        alert('Question Updated Successfully!');
+        window.location = '/quiz/'+id;
+    }
+
     console.log(id)
 
-    const [theQuestions, setTheQuestions] = useState([[]])
+    const [theQuestions, setTheQuestions] = useState([]);
+
 
     useEffect(()=>{
         axios.get('http://localhost:8000/api/questions', {
@@ -40,7 +46,7 @@ export default function IndividualQuizPage() {
             <AddQuestion quizID={id} />
         </div>
         <div className="container container-fluid">
-            {theQuestions.map((e, i)=><IndividualQuestion key={i} quizID={id} question={e} />)}
+            {theQuestions.map((e, i)=><IndividualQuestion updateAlert={updateAlert} key={i} quizID={id} question={e} />)}
         </div>
     </div>
   )

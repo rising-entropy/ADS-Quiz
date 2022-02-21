@@ -228,7 +228,7 @@ class QuestionAPI(APIView):
         Question.objects.filter(id=id).update(quiz=quiz,question=question,imageLink=imageLink,option1=option1,option2=option2,option3=option3,option4=option4,correctAnswer=correctAnswer)
         
         return Response({"status": "200 OK", "message": "Updated Successfully!"})
-
+ 
     def delete(self, request, id):
         if validateJWT(request) is False:
             return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
