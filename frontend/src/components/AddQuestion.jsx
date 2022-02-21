@@ -34,9 +34,7 @@ export default function AddQuestion(props) {
             localStorage.setItem('jwt', '')
             window.location='/'
         })
-
     }
-
 
   return (
     <div className="container container-fluid card" style={{margin: '20px auto'}}>

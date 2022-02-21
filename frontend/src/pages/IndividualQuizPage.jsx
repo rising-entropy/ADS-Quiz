@@ -48,6 +48,12 @@ export default function IndividualQuizPage() {
         <div className="container container-fluid">
             {theQuestions.map((e, i)=><IndividualQuestion updateAlert={updateAlert} key={i} quizID={id} question={e} />)}
         </div>
+
+        <button style={{margin: '30px auto'}} className='btn btn-danger' onClick={(e)=>{
+            localStorage.setItem('jwt', '');
+            alert("Logged out Successfully!");
+            window.location='/';
+        }}>Logout</button>
     </div>
   )
 }
