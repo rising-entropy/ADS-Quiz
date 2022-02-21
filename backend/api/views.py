@@ -79,7 +79,34 @@ class QuizzesAPI(APIView):
         return Response(theRequiredInstances)
 
 class QuizAPI(APIView):
+
+    def post(self, request, id):
+        if validateJWT(request) is False:
+            return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
+        theAnswers = request.data['answers']
+        # {
+        #     "id": 1,
+        #     "answer": ""
+        # }
+        score = 0
+        theQuiz = Quiz.objects.filter(id=id)[0]
+        totalQuestionCount = len(Question.objects.filter(quiz=theQuiz))
+        for answer in theAnswers:
+            if Question.objects.filter(id=answer.id)[0].correctAnswer == answer.answer:
+                score += 1
+        userData = jwt.decode(request.META['HTTP_AUTHORIZATION'], JWT_SECRET, JWT_ALGORITHM)
+        theUsername = userData.username
+        theUser = User.objects.filter(username=theUsername)
+        newScore = Score(score=score, questionCount=totalQuestionCount, student=theUser, quiz=theQuiz)
+        newScore.save()
+
+        return Response({
+            "score": score,
+            "questions": totalQuestionCount,
+            "quiz": theQuiz.name
+        })
     
+
     def get(self, request, id):
         if validateJWT(request) is False:
             return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
@@ -147,7 +174,6 @@ class QuestionAPI(APIView):
     def put(self, request, id):
         if validateJWT(request) is False:
             return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
-        
         quiz = request.data['quizID']
         quiz = Quiz.objects.filter(id = quiz)[0]
         question = request.data['question']
@@ -157,7 +183,6 @@ class QuestionAPI(APIView):
         option3 = request.data['option3']
         option4 = request.data['option4']
         correctAnswer = request.data['correctAnswer']
-        
         Question.objects.filter(id=id).update(quiz=quiz,question=question,imageLink=imageLink,option1=option1,option2=option2,option3=option3,option4=option4,correctAnswer=correctAnswer)
         
         return Response({"status": "200 OK", "message": "Updated Successfully!"})
@@ -165,7 +190,23 @@ class QuestionAPI(APIView):
     def delete(self, request, id):
         if validateJWT(request) is False:
             return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
-        
         Question.objects.filter(id=id).delete()
-        
         return Response({"status": "200 OK", "message": "Deleted Successfully!"})
+
+class ScoresAPI(APIView):
+
+    def get(self, request, id):
+        if validateJWT(request) is False:
+                return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
+        theQuiz=Quiz.objects.filter(id=id)[0]
+        theInstances = Score.objects.filter(quiz=theQuiz)
+        theRequiredInstances = []
+        for i in theInstances:
+            theRequiredInstances.append({
+                "quiz": i.quiz.name,
+                "score": i.score,
+                "questions": i.questionCount,
+                "username": i.student.username,
+                "name": i.student.first_name+" "+i.student.last_name
+            })
+        return Response(theRequiredInstances)

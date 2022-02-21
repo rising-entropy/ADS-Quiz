@@ -17,5 +17,7 @@ class Question(models.Model):
     correctAnswer = models.CharField(max_length=1000)
 
 class Score(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, default=None)
     score = models.IntegerField()
+    questionCount = models.IntegerField(default=0)
     student = models.ForeignKey(User, on_delete=models.CASCADE)
