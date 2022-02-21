@@ -12,10 +12,13 @@ from .models import *
 import json
 from datetime import datetime, timedelta
 import pytz
+from django.core import serializers
 from django.http import HttpResponse, HttpResponseRedirect
 utc=pytz.UTC
 # Create your views here.
 
+JWT_SECRET = 'HarryMaguire'
+JWT_ALGORITHM = 'HS256'
 
 def validateJWT(request):
     jwtToken = request.META['HTTP_AUTHORIZATION']
@@ -28,8 +31,7 @@ def validateJWT(request):
 class LoginAPI(APIView):
 
     def post(self, request):
-        JWT_SECRET = 'HarryMaguire'
-        JWT_ALGORITHM = 'HS256'
+        
         # JWT_EXP_DELTA_SECONDS = 2628000
         JWT_EXP_DELTA_SECONDS = 2628000
         username = request.data['username']
@@ -92,11 +94,21 @@ class QuizAPI(APIView):
         theQuiz = Quiz.objects.filter(id=id)[0]
         totalQuestionCount = len(Question.objects.filter(quiz=theQuiz))
         for answer in theAnswers:
-            if Question.objects.filter(id=answer.id)[0].correctAnswer == answer.answer:
+            theID = -1
+            theAnswer = ""
+            for k,v in answer.items():
+                if k == "id":
+                    theID = v
+                if k == "answer":
+                    theAnswer = v
+            if Question.objects.filter(id=theID)[0].correctAnswer == theAnswer:
                 score += 1
         userData = jwt.decode(request.META['HTTP_AUTHORIZATION'], JWT_SECRET, JWT_ALGORITHM)
-        theUsername = userData.username
-        theUser = User.objects.filter(username=theUsername)
+        theUsername = ""
+        for k,v in userData.items():
+            if k=='username':
+                theUsername=v
+        theUser = User.objects.filter(username=theUsername)[0]
         newScore = Score(score=score, questionCount=totalQuestionCount, student=theUser, quiz=theQuiz)
         newScore.save()
 
@@ -163,12 +175,43 @@ class QuestionsAPI(APIView):
         theQuestion.save()
         return Response({"status": "201 OK", "message": "Created Successfully!"})
 
+    def get(self, request):
+        if validateJWT(request) is False:
+            return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
+        theQuestions = Question.objects.filter()
+        theRequiredQuestions = []
+        for i in theQuestions:
+            theRequiredQuestions.append({
+                "id": i.id,
+                "question": i.question,
+                "imageLink": i.imageLink,
+                "option1": i.option1,
+                "option2": i.option2,
+                "option3": i.option3,
+                "option4": i.option4,
+                "correctAnswer": i.correctAnswer,
+                "quiz": i.quiz.name
+            })
+        return Response(theRequiredQuestions)
+
+
 class QuestionAPI(APIView):
     
     def get(self, request, id):
         if validateJWT(request) is False:
             return Response({"status": "401 Unauthorized", "message": "authentication token invalid."})
         theQuestion = Question.objects.filter(id=id)[0]
+        theQuestion = {
+            "id": theQuestion.id,
+            "question": theQuestion.question,
+            "imageLink": theQuestion.imageLink,
+            "option1": theQuestion.option1,
+            "option2": theQuestion.option2,
+            "option3": theQuestion.option3,
+            "option4": theQuestion.option4,
+            "correctAnswer": theQuestion.correctAnswer,
+            "quizID": theQuestion.quiz.id
+        }
         return Response(theQuestion)
     
     def put(self, request, id):
